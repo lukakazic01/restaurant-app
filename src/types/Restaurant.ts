@@ -1,6 +1,6 @@
 import type { Availability } from "@/types/Posts.ts";
 
-export interface Place {
+export interface Restaurant {
     document_type: string
     content_type: string
     title: string
