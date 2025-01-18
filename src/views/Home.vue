@@ -17,14 +17,14 @@
       <input class="border basis-4/12 rounded p-2" v-model="time" placeholder="Time" type="time" />
     </div>
     <button class="mt-6 bg-red-500 text-white rounded w-96 p-2" @click="searchForPlaces">Search</button>
-    <div class="flex flex-col gap-4 mt-6 w-full">
+    <div class="flex flex-col gap-4 mt-6 w-full" ref="scrollContainer">
       <BookingPlace v-for="place in places" :key="place.title" :place />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
+import {ref, useTemplateRef} from "vue";
 import {formatDate} from "@/utils/formatDate.ts";
 import axios from "axios";
 import {useUserStore} from "@/stores/user.ts";
@@ -33,6 +33,7 @@ import type {Posts} from "@/types/Posts.ts";
 import type {Place} from "@/types/Place.ts";
 import BookingPlace from "@/components/BookingPlace.vue";
 import type {User} from "@/types/User.ts";
+import {useInfiniteScroll} from "@/composables/useInfiniteScroll.ts";
 
 const userStore = useUserStore()
 const numberOfPeople = ref<string>('1')
@@ -40,6 +41,9 @@ const date = ref<string>(formatDate()[0]);
 const time = ref<string>(formatDate()[1]);
 const places = ref<Place[]>([])
 const loading = ref(false);
+const scrollContainer = useTemplateRef<HTMLElement>('scrollContainer');
+
+useInfiniteScroll(scrollContainer,  () => searchForPlaces());
 
 const searchForPlaces = async () => {
   const searchId  = await getSearchId()
@@ -50,6 +54,7 @@ const searchForPlaces = async () => {
   })
 }
 
+//Fetching the jwt and immediately fetching the restaurants for booking
 (async () => {
   try {
     loading.value = true
@@ -66,8 +71,8 @@ const searchForPlaces = async () => {
 const getSearchId = async () => {
   const { data } = await axios.post<SearchToken>('https://site.ontopo.work/api/search_token', {
     criteria: {
-      date: '20250118',
-      time: '0800',
+      date: date.value.replaceAll('-', ''),
+      time: time.value.replaceAll(':', ''),
       size: numberOfPeople.value,
     },
     marketplace_id: "15380287",
