@@ -22,6 +22,7 @@ export interface Restaurant {
     statics: Statics
     is_private: boolean
     availability: Availability
+    show_areas: boolean
 }
 
 export interface Geolocation {

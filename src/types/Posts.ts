@@ -45,7 +45,7 @@ export interface Area {
 
 export interface Option {
     time: string
-    method: string
+    method: 'disabled' | 'seat'
     score: number
     text?: string
 }

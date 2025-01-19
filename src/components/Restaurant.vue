@@ -17,29 +17,31 @@
         </div>
       </div>
     <div class="w-[1px] bg-gray-200" />
-    <div class="flex gap-2 items-center pt-2 basis-4/12 justify-center">
-      <p class="p-2 border-2 border-black rounded flex flex-col items-center text-center" v-for="recommended in restaurant.availability.recommended">
-        <span>
-          {{ recommended.time.slice(0,2) + ':' + recommended.time.slice(2) }}
-        </span>
-        <span class="flex items-center gap-1" v-if="recommended.text">
-          <span class="size-2 rounded-full bg-blue-500 block" />
-          <span class="truncate w-[100px]">{{ recommended.text }}</span>
-        </span>
-      </p>
+    <div class="flex flex-col gap-2 items-center pt-2 basis-4/12 justify-center">
+      <div class="flex flex-row gap-2">
+        <RestaurantAvailabilityTime v-for="option in restaurant.availability.recommended" :key="option.id" :option />
+      </div>
+      <button @click="showAreasForSelectedRestaurant(restaurant, index)">{{ showAreasBtnText }}</button>
     </div>
   </div>
+  <RestaurantAllAvailabbleBookings v-if="restaurant.show_areas" :areas="restaurant.availability.areas" />
 </template>
 
 <script setup lang="ts">
 import type {Restaurant} from "@/types/Restaurant.ts";
 import {computed} from "vue";
+import RestaurantAvailabilityTime from "@/components/RestaurantAvailabilityTime.vue";
+import {useRestaurantStore} from "@/stores/restaurant.ts";
+import RestaurantAllAvailabbleBookings from "@/components/RestaurantAllAvailabbleBookings.vue";
 
 const { restaurant } = defineProps<{
-  restaurant: Restaurant
+  restaurant: Restaurant,
+  index: number;
 }>()
+const { showAreasForSelectedRestaurant } = useRestaurantStore()
 
 const subtitle = computed(() => restaurant.subtitle.split(',')[0])
+const showAreasBtnText = computed(() => restaurant.show_areas ? restaurant.availability.page.showLess : restaurant.availability.page.showMore)
 </script>
 
 <style scoped>

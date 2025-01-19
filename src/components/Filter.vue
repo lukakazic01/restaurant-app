@@ -56,26 +56,26 @@ function isValidSize(size: number) {
 // Also, time can't be between 23:00 and 08:00 which I didn't validate, so this should be improved as well in real world app
 function validateQueryParams() {
   const { numberOfPeople, date, time } = route.query;
-  const size = parseInt(numberOfPeople as string);
+  const size = Number(numberOfPeople);
   if (!numberOfPeople || isValidSize(size)) form.numberOfPeople = '1'
   if (isValidDate(date as string)) form.date = formatDate()[0]
   if (isValidTime(time as string)) form.time = formatDate()[1]
 }
 
 const searchForRestaurants = () => {
-  if(!validateInputs()) return;
+  if(!validateForm()) return;
   router.push({ path: '/search', query: { ...form } })
   emit('update:restaurants', form)
   restaurantsStore.restaurants = []
 }
 
-const validateInputs = () => {
-  if (!isValidDate(form.date)) error.date = 'Invalid date';
-  if (!isValidTime(form.time)) error.time = 'Invalid time';
-  const size = parseInt(form.numberOfPeople)
-  if (isValidSize(size)) error.numberOfPeople = 'Number of people must be between 1 and 10';
-  for(const [_, error] of Object.entries(form)) {
-    if (error) return false;
+const validateForm = () => {
+  if (!isValidDate(form.date)) error.date = 'Date must be in dd-mm-yyyy format';
+  if (!isValidTime(form.time)) error.time = 'Time must be in hh-mm format';
+  const size = Number(form.numberOfPeople)
+  if (isValidSize(size)) error.numberOfPeople = 'Number of guests must be between 1 and 10';
+  for(const [_, e] of Object.entries(error)) {
+    if (e) return false;
   }
   return true
 }
