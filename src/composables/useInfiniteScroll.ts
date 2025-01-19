@@ -7,7 +7,7 @@ export const useInfiniteScroll = (scrollContainer: Ref<HTMLElement | null>, cb: 
         if (!scrollContainer.value) return;
         let element = scrollContainer.value
         if (Math.floor(element.getBoundingClientRect().bottom) <= window.innerHeight) cb()
-    }, 1000)
+    }, 150)
 
     onMounted(() => {
         window.addEventListener('scroll', handleInfiniteScroll)

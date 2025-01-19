@@ -20,7 +20,6 @@
 
 <script setup lang="ts">
 import {ref, useTemplateRef} from "vue";
-import axios from "axios";
 import type {SearchToken} from "@/types/SearchToken.ts";
 import type {Post, Posts} from "@/types/Posts.ts";
 import type {User} from "@/types/User.ts";
@@ -31,11 +30,11 @@ import Filter from "@/components/Filter.vue";
 import {useRoute} from "vue-router";
 import Loader from "@/components/Loader.vue";
 import {getErrorMessage} from "@/utils/getErrorMessage.ts";
+import axios from "@/config/axios.ts";
 
 const route = useRoute()
 const restaurantStore = useRestaurantStore()
 const scrollContainer = useTemplateRef<HTMLElement>('scrollContainer');
-const token = ref('');
 const loading = ref(false);
 const errorMessage = ref("");
 let total = 0
@@ -47,12 +46,10 @@ useInfiniteScroll(scrollContainer,  () => {
   }
 });
 
-// For the simplicity, token is stored in local variable and passed to every request manually
-// In real application, I would make config and pass from localStorage on every request token automatically
 (async () => {
   try {
-    const { data } = await axios.post<User>('https://site.ontopo.work/api/loginAnonymously')
-    token.value = data.jwt_token
+    const { data } = await axios.post<User>('/api/loginAnonymously')
+    localStorage.setItem("token", data.jwt_token)
     await getRestaurants()
   } catch (e) {
     errorMessage.value = getErrorMessage(e)
@@ -65,7 +62,7 @@ async function getRestaurants() {
     const searchId  = await getSearchId()
     const searchData = await getSearchData(searchId)
     searchData.posts.forEach((p) => {
-      axios.get(`https://site.ontopo.work/api/slug_content?slug=${p.post.slug}&version=${p.post.version}&distributor=14699131&locale=sr`)
+      axios.get(`/api/slug_content?slug=${p.post.slug}&version=${p.post.version}&distributor=14699131&locale=sr`)
           .then((res) => restaurantStore.restaurants.push({ ...res.data, availability: p.availability, show_areas: false }))
     })
   } catch (e) {
@@ -81,7 +78,7 @@ const getSearchId = async () => {
     time: typeof route.query.time === 'string' ? route.query.time : '',
     numberOfPeople: typeof route.query.numberOfPeople === 'string' ? route.query.numberOfPeople : '',
   }
-  const { data } = await axios.post<SearchToken>('https://site.ontopo.work/api/search_token', {
+  const { data } = await axios.post<SearchToken>('/api/search_token', {
     criteria: {
       date: filters.date.replaceAll('-', ''),
       time: filters.time.replaceAll(':', ''),
@@ -90,14 +87,14 @@ const getSearchId = async () => {
     marketplace_id: "15380287",
     locale: "en",
     geocodes: ["belgrade"]
-  }, { headers: { token: token.value } })
+  })
   return data.search_id
 }
 
 const getSearchData = async (searchId: string) => {
-  const { data } = await axios.post<Posts>('https://site.ontopo.work/api/search_request', {
+  const { data } = await axios.post<Posts>('/api/search_request', {
     search_id: searchId,
-  } , { headers: { token: token.value } })
+  })
   posts = [...posts, ...data.posts]
   total = data.total
   return data
