@@ -5,13 +5,16 @@
       <template v-if="restaurantStore.restaurants.length">
         <Restaurant v-for="(restaurant, index) in restaurantStore.restaurants" :key="restaurant.title" :restaurant :index />
       </template>
-      <div class="text-center" v-else-if="!errorMessage && !loading && !restaurantStore.restaurants.length">
+      <div class="text-center" v-else-if="!errorMessage && !searchDataLoader && !tokenLoader && !restaurantStore.restaurants.length">
         Sorry, but currently there are no restaurants to book for this filter, try again later.
       </div>
-      <div class="text-center text-red-500" v-else-if="errorMessage && !loading">
+      <div class="text-center text-red-500" v-else-if="errorMessage && !searchDataLoader">
         {{ errorMessage }}
       </div>
-      <div class="flex justify-center py-10" :class="{ 'visible': loading, '!invisible': !loading }">
+      <div
+          class="flex justify-center py-10"
+         :class="{ 'visible': searchDataLoader || tokenLoader, '!invisible': !searchDataLoader && !tokenLoader }"
+      >
         <Loader />
       </div>
     </div>
@@ -35,7 +38,8 @@ import axios from "@/config/axios.ts";
 const route = useRoute()
 const restaurantStore = useRestaurantStore()
 const scrollContainer = useTemplateRef<HTMLElement>('scrollContainer');
-const loading = ref(false);
+const searchDataLoader = ref(false);
+const tokenLoader = ref(false);
 const errorMessage = ref("");
 let total = 0
 let posts: Post[] = [];
@@ -48,27 +52,39 @@ useInfiniteScroll(scrollContainer,  () => {
 
 (async () => {
   try {
+    tokenLoader.value = true;
     const { data } = await axios.post<User>('/api/loginAnonymously')
     localStorage.setItem("token", data.jwt_token)
     await getRestaurants()
   } catch (e) {
     errorMessage.value = getErrorMessage(e)
+  } finally {
+    tokenLoader.value = false;
   }
 })()
 
 async function getRestaurants() {
   try {
-    loading.value = true;
+    searchDataLoader.value = true;
     const searchId  = await getSearchId()
     const searchData = await getSearchData(searchId)
-    searchData.posts.forEach((p) => {
-      axios.get(`/api/slug_content?slug=${p.post.slug}&version=${p.post.version}&distributor=14699131&locale=sr`)
-          .then((res) => restaurantStore.restaurants.push({ ...res.data, availability: p.availability, show_areas: false }))
-    })
+    await Promise.allSettled(
+        searchData.posts.map((p) =>
+          axios.get(`/api/slug_content?slug=${p.post.slug}&version=${p.post.version}&distributor=14699131&locale=sr`)
+              .then((res) => {
+                restaurantStore.restaurants.push({
+                  ...res.data,
+                  availability: p.availability,
+                  show_areas: false,
+                });
+              })
+              .catch(() => null)
+        )
+    );
   } catch (e) {
     errorMessage.value = getErrorMessage(e)
   } finally {
-    loading.value = false;
+    searchDataLoader.value = false;
   }
 }
 
