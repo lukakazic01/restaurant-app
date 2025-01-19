@@ -2,8 +2,8 @@
   <div class="bg-gray-200 p-6 flex flex-col gap-2 rounded">
     <div v-for="area in areas" :key="area.id" class="space-y-2">
       <p class="font-bold">{{ area.name }}</p>
-      <div class="flex gap-2">
-        <RestaurantAvailabilityTime v-for="option in area.options" :key="option.method" :option />
+      <div class="flex gap-2 flex-wrap">
+        <RestaurantAvailabilityTime class="max-w-[15%] w-2/12" v-for="option in area.options" :key="option.method" :option />
       </div>
     </div>
   </div>

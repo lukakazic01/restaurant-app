@@ -1,5 +1,5 @@
 import {DATE_REGEX} from "@/constants";
 
-export const isValidDate = (value: string) => {
-    return DATE_REGEX.test(value);
+export const isValidDate = (date: string) => {
+    return DATE_REGEX.test(date);
 }

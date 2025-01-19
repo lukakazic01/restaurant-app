@@ -1,7 +1,7 @@
 <template>
-  <div class="flex w-full border gap-4 rounded">
-    <img :src="restaurant.cover" class="w-[340px] basis-4/12 aspect-[16/9] object-cover" />
-    <div class="flex flex-col gap-2 basis-4/12">
+  <div class="flex gap-2 w-full border rounded">
+    <img :src="restaurant.cover" class="w-[calc(33.3333%-4px)] max-w-[calc(33.3333%-4px)] aspect-[16/9] object-cover" alt="Restaurant cover" />
+    <div class="flex flex-col gap-2 w-[calc(33.3333%-4px)] max-w-[calc(33.3333%-4px)]">
         <div class="flex h-fit items-center gap-4">
           <img :src="restaurant.logo" class="size-14 rounded-full" />
           <div class="flex flex-col">
@@ -16,15 +16,14 @@
           <span class="bg-gray-200 text-xs rounded-sm p-2" v-if="restaurant.tag3">{{ restaurant.tag3 }}</span>
         </div>
       </div>
-    <div class="w-[1px] bg-gray-200" />
-    <div class="flex flex-col gap-2 items-center pt-2 basis-4/12 justify-center">
-      <div class="flex flex-row gap-2">
-        <RestaurantAvailabilityTime v-for="option in restaurant.availability.recommended" :key="option.id" :option />
+    <div class="flex flex-col gap-2 items-center border-l border-l-200 p-2 w-[calc(33.3333%-4px)] max-[calc(33.3333%-4px)] justify-center">
+      <div class="flex flex-row gap-2 w-full">
+        <RestaurantAvailabilityTime class="w-[calc(50%-4px)] max-w-[calc(50%-4px)]" v-for="option in restaurant.availability.recommended" :key="option.id" :option />
       </div>
       <button @click="showAreasForSelectedRestaurant(restaurant, index)">{{ showAreasBtnText }}</button>
     </div>
   </div>
-  <RestaurantAllAvailabbleBookings v-if="restaurant.show_areas" :areas="restaurant.availability.areas" />
+  <RestaurantAllAvailabbleBookings v-show="restaurant.show_areas" :areas="restaurant.availability.areas" />
 </template>
 
 <script setup lang="ts">
