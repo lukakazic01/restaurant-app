@@ -3,7 +3,7 @@
     <div v-for="area in areas" :key="area.id" class="space-y-2">
       <p class="font-bold">{{ area.name }}</p>
       <div class="flex gap-2 flex-wrap">
-        <RestaurantAvailabilityTime class="max-w-[15%] w-2/12" v-for="option in area.options" :key="option.method" :option />
+        <RestaurantAvailabilityTime class="md:max-w-[16.6666%] md:w-2/12 w-[calc(33.3333%-6px)] max-w-[calc(33.3333%-6px)]" v-for="option in area.options" :key="option.method" :option />
       </div>
     </div>
   </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center flex-col pt-10">
+  <div class="flex items-center flex-col pt-10 px-6">
     <Filter @update:restaurants="getRestaurants" />
     <div class="flex flex-col gap-4 mt-6 w-full" ref="scrollContainer">
       <template v-if="restaurantStore.restaurants.length">

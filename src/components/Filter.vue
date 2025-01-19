@@ -1,12 +1,12 @@
 <template>
   <form class="w-full flex flex-col items-center" @input="removeErrors" @submit.prevent="searchForRestaurants">
-    <div class="flex gap-6 mt-2 justify-center w-full">
+    <div class="flex sm:flex-row flex-col gap-6 mt-2 justify-center w-full">
       <!-- In a real world app, I would try to make all of these components as BaseInputs, so it can accept any type of input -->
       <FilterNumberOfPeople class="basis-4/12" v-model:numberOfPeople="form.numberOfPeople" :error="error.numberOfPeople" />
       <FilterDate class="basis-4/12" v-model:date="form.date" :error="error.date" />
       <FilterTime class="basis-4/12" v-model:time="form.time" :error="error.time" />
     </div>
-    <button type="submit" class="mt-6 bg-red-500 text-white rounded w-96 p-2">Search</button>
+    <button type="submit" class="mt-6 bg-red-500 text-white rounded sm:w-96 w-full p-2">Search</button>
   </form>
 </template>
 
@@ -70,7 +70,7 @@ const validateForm = () => {
   if (!isValidDate(form.date)) error.date = 'Date must be in dd-mm-yyyy format';
   if (!isValidTime(form.time)) error.time = 'Time must be in hh-mm format';
   const size = Number(form.numberOfPeople)
-  if (isValidSize(size)) error.numberOfPeople = 'Number of guests must be between 1 and 10';
+  if (!isValidSize(size)) error.numberOfPeople = 'Number of guests must be between 1 and 10';
   for(const [_, e] of Object.entries(error)) {
     if (e) return false;
   }
