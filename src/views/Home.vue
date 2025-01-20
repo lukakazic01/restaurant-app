@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import {ref, useTemplateRef} from "vue";
 import type {SearchToken} from "@/types/SearchToken.ts";
-import type {Post, Posts} from "@/types/Posts.ts";
+import type {Posts} from "@/types/Posts.ts";
 import type {User} from "@/types/User.ts";
 import {useInfiniteScroll} from "@/composables/useInfiniteScroll.ts";
 import {useRestaurantStore} from "@/stores/restaurant.ts";
@@ -42,10 +42,9 @@ const searchDataLoader = ref(false);
 const tokenLoader = ref(false);
 const errorMessage = ref("");
 let total = 0
-let posts: Post[] = [];
 
 useInfiniteScroll(scrollContainer,  () => {
-  if (total > posts.length) {
+  if (total > restaurantStore.restaurants.length) {
     getRestaurants()
   }
 });
@@ -111,7 +110,6 @@ const getSearchData = async (searchId: string) => {
   const { data } = await axios.post<Posts>('/api/search_request', {
     search_id: searchId,
   })
-  posts = [...posts, ...data.posts]
   total = data.total
   return data
 }
