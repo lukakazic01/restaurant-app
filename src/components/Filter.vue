@@ -31,9 +31,9 @@ const route = useRoute()
 const restaurantsStore = useRestaurantStore()
 
 const form = reactive({
-  date: route.query.date as string || formatDate()[0],
-  time: route.query.time as string || formatDate()[1],
-  numberOfPeople: route.query.numberOfPeople as string || '1'
+  date: typeof route.query.date === 'string' ? route.query.date : formatDate()[0],
+  time: typeof route.query.time === 'string' ? route.query.time : formatDate()[1],
+  numberOfPeople: typeof route.query.numberOfPeople === 'string' ? route.query.numberOfPeople : '1'
 })
 const error = reactive({
   date: '',
@@ -41,7 +41,7 @@ const error = reactive({
   numberOfPeople: ''
 })
 
-if (!route.query.length) {
+if (!Object.keys(route.query).length) {
   validateQueryParams()
   router.push({ path: '/search', query: { ...form } })
 }
