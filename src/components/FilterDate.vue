@@ -18,7 +18,7 @@ import {formatDate} from "@/utils/formatDate.ts";
 const { error = '' } = defineProps<{
   error: string;
 }>()
-const date = defineModel("date", { default: formatDate()[0], required: true })
+const date = defineModel("date", { required: true })
 </script>
 
 <style scoped>

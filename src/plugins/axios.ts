@@ -1,5 +1,6 @@
 import axios from 'axios'
 import {TOKEN} from "@/constants";
+import type {App} from "vue";
 
 axios.defaults.baseURL = 'https://site.ontopo.work' // This should be inside .env file
 
@@ -18,4 +19,8 @@ axios.interceptors.response.use(
     }
 )
 
-export default axios
+export default {
+    install: (app: App) => {
+        app.provide('axios', axios);
+    }
+};

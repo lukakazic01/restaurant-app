@@ -15,11 +15,10 @@
 </template>
 
 <script setup lang="ts">
-import {formatDate} from "@/utils/formatDate.ts";
 const { error = '' } = defineProps<{
   error: string;
 }>()
-const time = defineModel("time", { default: formatDate()[1], required: true })
+const time = defineModel("time", { required: true })
 </script>
 
 <style scoped>

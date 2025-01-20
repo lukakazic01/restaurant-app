@@ -15,7 +15,7 @@
 const { error = '' } = defineProps<{
   error: string
 }>()
-const numberOfPeople = defineModel('numberOfPeople', { required: true, default: '1' })
+const numberOfPeople = defineModel('numberOfPeople', { required: true })
 </script>
 
 <style scoped>

@@ -1,14 +1,14 @@
 <template>
   <div class="flex items-center flex-col pt-10 px-6">
-    <Filter @update:restaurants="getRestaurants" />
+    <Filter @update:restaurants="getRestaurants" :loading="searchDataLoader" />
     <div class="flex flex-col gap-4 mt-6 w-full" ref="scrollContainer">
       <template v-if="restaurantStore.restaurants.length">
         <Restaurant v-for="(restaurant, index) in restaurantStore.restaurants" :key="restaurant.title" :restaurant :index />
       </template>
-      <div class="text-center" v-else-if="!errorMessage && !searchDataLoader && !tokenLoader && !restaurantStore.restaurants.length">
+      <div class="text-center" v-else-if="shouldShowBadFilterMessage">
         Sorry, but currently there are no restaurants to book for this filter, try again later.
       </div>
-      <div class="text-center text-red-500" v-else-if="errorMessage && !searchDataLoader">
+      <div class="text-center text-red-500" v-else-if="shouldShowErrorMessage">
         {{ errorMessage }}
       </div>
       <div
@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, useTemplateRef} from "vue";
+import {computed, ref, useTemplateRef} from "vue";
 import type {SearchToken} from "@/types/SearchToken.ts";
 import Restaurant from '@/components/Restaurant.vue'
 import type {Availability, Posts} from "@/types/Posts.ts";
@@ -29,18 +29,23 @@ import type {User} from "@/types/User.ts";
 import {useInfiniteScroll} from "@/composables/useInfiniteScroll.ts";
 import {useRestaurantStore} from "@/stores/restaurant.ts";
 import Filter from "@/components/Filter.vue";
-import {useRoute} from "vue-router";
 import Loader from "@/components/Loader.vue";
 import {getErrorMessage} from "@/utils/getErrorMessage.ts";
-import axios from "@/config/axios.ts";
 import type {RestaurantI} from "@/types/Restaurant.ts";
+import {useFilterStore} from "@/stores/filter.ts";
+import {useAxios} from "@/composables/useAxios.ts";
 
-const route = useRoute()
+const axios = useAxios()
 const restaurantStore = useRestaurantStore()
+const filterStore = useFilterStore()
 const scrollContainer = useTemplateRef<HTMLElement>('scrollContainer');
 const searchDataLoader = ref(false);
 const tokenLoader = ref(false);
 const errorMessage = ref("");
+
+const shouldShowBadFilterMessage = computed(() => !errorMessage.value && !searchDataLoader.value && !tokenLoader.value && !restaurantStore.restaurants.length)
+const shouldShowErrorMessage = computed(() => errorMessage.value && !searchDataLoader.value && !tokenLoader.value)
+
 let total = 0
 
 useInfiniteScroll(scrollContainer,  () => {
@@ -87,15 +92,11 @@ async function getRestaurants() {
 }
 
 const getSearchId = async () => {
-  const filters = {
-    date: typeof route.query.date === 'string' ? route.query.date : '',
-    time: typeof route.query.time === 'string' ? route.query.time : '',
-    numberOfPeople: typeof route.query.numberOfPeople === 'string' ? route.query.numberOfPeople : '',
-  }
+  const filters = filterStore.preparedForm;
   const { data } = await axios.post<SearchToken>('/api/search_token', {
     criteria: {
-      date: filters.date.replaceAll('-', ''),
-      time: filters.time.replaceAll(':', ''),
+      date: filters.date,
+      time: filters.time,
       size: filters.numberOfPeople,
     },
     marketplace_id: "15380287",

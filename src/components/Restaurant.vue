@@ -37,7 +37,7 @@ import RestaurantAvailabilityTime from "@/components/RestaurantAvailabilityTime.
 import {useRestaurantStore} from "@/stores/restaurant.ts";
 import RestaurantAllAvailableBookings from "@/components/RestaurantAllAvailableBookings.vue";
 
-const { restaurant } = defineProps<{
+const { restaurant, index } = defineProps<{
   restaurant: RestaurantI,
   index: number;
 }>()
