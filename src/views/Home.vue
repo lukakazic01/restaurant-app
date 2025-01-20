@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center flex-col pt-10 px-6">
-    <Filter @update:restaurants="getRestaurants" :loading="searchDataLoader" />
+    <Filter @update:restaurants="getRestaurants" :loading="tokenLoader || restaurantStore.loading" />
     <div class="flex flex-col gap-4 mt-6 w-full" ref="scrollContainer">
       <template v-if="restaurantStore.restaurants.length">
         <Restaurant v-for="(restaurant, index) in restaurantStore.restaurants" :key="restaurant.title" :restaurant :index />
@@ -13,7 +13,7 @@
       </div>
       <div
         class="flex justify-center py-10"
-       :class="{ 'visible': searchDataLoader || tokenLoader, '!invisible': !searchDataLoader && !tokenLoader }">
+       :class="{ 'visible': restaurantStore.loading || tokenLoader, '!invisible': !restaurantStore.loading && !tokenLoader }">
         <Loader />
       </div>
     </div>
@@ -39,16 +39,15 @@ const axios = useAxios()
 const restaurantStore = useRestaurantStore()
 const filterStore = useFilterStore()
 const scrollContainer = useTemplateRef<HTMLElement>('scrollContainer');
-const searchDataLoader = ref(false);
 const tokenLoader = ref(false);
 const errorMessage = ref("");
 
-const shouldShowBadFilterMessage = computed(() => !errorMessage.value && !searchDataLoader.value && !tokenLoader.value && !restaurantStore.restaurants.length)
-const shouldShowErrorMessage = computed(() => errorMessage.value && !searchDataLoader.value && !tokenLoader.value)
+const shouldShowBadFilterMessage = computed(() => !errorMessage.value && !restaurantStore.loading && !tokenLoader.value && !restaurantStore.restaurants.length)
+const shouldShowErrorMessage = computed(() => errorMessage.value && !restaurantStore.loading && !tokenLoader.value)
 
 let total = 0
 
-useInfiniteScroll(scrollContainer,  () => {
+useInfiniteScroll(scrollContainer, () => {
   if (total > restaurantStore.restaurants.length) {
     getRestaurants()
   }
@@ -69,7 +68,7 @@ useInfiniteScroll(scrollContainer,  () => {
 
 async function getRestaurants() {
   try {
-    searchDataLoader.value = true;
+    restaurantStore.loading = true;
     const searchId  = await getSearchId()
     const searchData = await getSearchData(searchId)
     const restaurantAvailabilities: Availability[] = []
@@ -87,7 +86,7 @@ async function getRestaurants() {
   } catch (e) {
     errorMessage.value = getErrorMessage(e)
   } finally {
-    searchDataLoader.value = false;
+    restaurantStore.loading = false;
   }
 }
 

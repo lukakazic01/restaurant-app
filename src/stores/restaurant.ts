@@ -4,6 +4,7 @@ import type {RestaurantI} from "@/types/Restaurant.ts";
 
 export const useRestaurantStore = defineStore('restaurant', () => {
     const restaurants = ref<RestaurantI[]>([])
+    const loading = ref(false)
 
     // Since it happens that we get duplicates from response, index was needed to check against it
     const showAreasForSelectedRestaurant = (restaurant: RestaurantI, index: number) => {
@@ -20,5 +21,5 @@ export const useRestaurantStore = defineStore('restaurant', () => {
         })
     }
 
-    return { restaurants, showAreasForSelectedRestaurant }
+    return { restaurants, loading, showAreasForSelectedRestaurant }
 })

@@ -2,21 +2,31 @@
   <form class="w-full flex flex-col items-center" @input="removeErrors" @submit.prevent="searchForRestaurants">
     <div class="flex sm:flex-row flex-col gap-6 mt-2 justify-center w-full">
       <!-- In a real world app, I would try to make all of these components as BaseInputs, so it can accept any type of input -->
-      <!-- Also, i wasn't sure if i was supposed to use text inputs, i thought this would be better user experience -->
+      <!-- Also, i wasn't sure if i was supposed to use text inputs, i thought it would be better user experience to use date and time inputs -->
       <FilterNumberOfPeople
-          class="basis-4/12"
-          v-model:numberOfPeople="filterStore.form.numberOfPeople"
-          :error="error.numberOfPeople"
+        class="basis-4/12"
+        :min="1"
+        :max="10"
+        required
+        v-model:numberOfPeople="filterStore.form.numberOfPeople"
+        :error="error.numberOfPeople"
       />
       <FilterDate
-          class="basis-4/12"
-          v-model:date="filterStore.form.date"
-          :error="error.date"
+        class="basis-4/12"
+        placeholder="Date"
+        :min="getFormattedDateTime()[0]"
+        required
+        v-model:date="filterStore.form.date"
+        :error="error.date"
       />
       <FilterTime
-          class="basis-4/12"
-          v-model:time="filterStore.form.time"
-          :error="error.time"
+        class="basis-4/12"
+        :min="getFormattedDateTime()[1]"
+        max="23:00"
+        placeholder="Time"
+        required
+        v-model:time="filterStore.form.time"
+        :error="error.time"
       />
     </div>
     <button
@@ -30,7 +40,7 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-import {formatDate} from "@/utils/formatDate.ts";
+import {getFormattedDateTime} from "@/utils/getFormattedDateTime.ts";
 import {useRouter, useRoute} from "vue-router";
 import {useRestaurantStore} from "@/stores/restaurant.ts";
 import FilterNumberOfPeople from "@/components/FilterNumberOfPeople.vue";
@@ -39,6 +49,7 @@ import FilterTime from "@/components/FilterTime.vue";
 import {isValidDate} from "@/utils/validators/isValidDate.ts";
 import {isValidTime} from "@/utils/validators/isValidTime.ts";
 import {useFilterStore} from "@/stores/filter.ts";
+import {isValidSize} from "@/utils/validators/isValidSize.ts"
 
 const emit = defineEmits<{
   'update:restaurants': []
@@ -57,32 +68,23 @@ const error = ref({
   numberOfPeople: ''
 })
 
-if (!Object.keys(route.query).length) {
-  validateQueryParams()
+if (Object.keys(route.query).length) {
+  filterStore.validateQueryParams()
   router.push({ path: '/search', query: { ...filterStore.form } })
-}
-
-function validateQueryParams() {
-  const { numberOfPeople, date, time } = route.query;
-  const parsedDate = typeof date === "string" ? date : ''
-  const parsedTime = typeof time === "string" ? time : ''
-  const parsedNumberOfPeople = typeof numberOfPeople === "string" ? numberOfPeople : ''
-  const size = Number(parsedNumberOfPeople);
-  if (!parsedNumberOfPeople || !isValidSize(size)) filterStore.form.numberOfPeople = '1'
-  if (!isValidDate(parsedDate) || formatDate()[0] > parsedDate) filterStore.form.date = formatDate()[0]
-  if (!isValidTime(parsedTime)) filterStore.form.time = formatDate()[1]
 }
 
 const searchForRestaurants = () => {
   if(!validateForm()) return;
   router.push({ path: '/search', query: { ...filterStore.form } })
-  emit('update:restaurants')
   restaurantsStore.restaurants = []
+  emit('update:restaurants')
 }
 
 const validateForm = () => {
-  if (!isValidDate(filterStore.form.date)) error.value.date = 'Date must be in dd-mm-yyyy format';
-  if (!isValidTime(filterStore.form.time)) error.value.time = 'Time must be in hh-mm format';
+  const validatedTime = isValidTime(filterStore.form.time)
+  const validatedDate = isValidDate(filterStore.form.date)
+  if (!validatedDate.isValid) error.value.date = validatedDate.errorMessage;
+  if (!validatedTime.isValid) error.value.time = validatedTime.errorMessage;
   const size = Number(filterStore.form.numberOfPeople)
   if (!isValidSize(size)) error.value.numberOfPeople = 'Number of guests must be between 1 and 10';
   for(const [_, e] of Object.entries(error.value)) {
@@ -95,10 +97,6 @@ const removeErrors = () => {
   error.value.time = ''
   error.value.date = ''
   error.value.numberOfPeople = ''
-}
-
-function isValidSize(size: number) {
-  return !(size < 1 || size > 10);
 }
 </script>
 

@@ -2,13 +2,11 @@
   <div class="flex flex-col gap-2">
     <input
         :class="{ 'border-red-500': error }"
-        required
-        min="08:00"
-        max="23:00"
+        v-bind="$attrs"
         class="border rounded p-2"
         v-model="time"
-        placeholder="Time"
         type="time"
+        :value="time"
     />
     <p v-if="error" class="text-xs text-red-500">{{ error }}</p>
   </div>

@@ -1,4 +1,4 @@
-export const formatDate = () => {
+export const getFormattedDateTime = () => {
     const d = new Date()
     const year = d.getFullYear()
     const month = String(d.getMonth() + 1).padStart(2, '0')
