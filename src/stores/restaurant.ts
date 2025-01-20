@@ -1,12 +1,12 @@
 import {defineStore} from "pinia";
 import {ref} from "vue";
-import type {Restaurant} from "@/types/Restaurant.ts";
+import type {RestaurantI} from "@/types/Restaurant.ts";
 
 export const useRestaurantStore = defineStore('restaurant', () => {
-    const restaurants = ref<Restaurant[]>([])
+    const restaurants = ref<RestaurantI[]>([])
 
     // Since it happens that we get duplicates from response, index was needed to check against it
-    const showAreasForSelectedRestaurant = (restaurant: Restaurant, index: number) => {
+    const showAreasForSelectedRestaurant = (restaurant: RestaurantI, index: number) => {
         if (!restaurants.value.length) return
         if (restaurant.show_areas) {
             restaurant.show_areas = false

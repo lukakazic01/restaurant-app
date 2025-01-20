@@ -31,14 +31,14 @@
 </template>
 
 <script setup lang="ts">
-import type {Restaurant} from "@/types/Restaurant.ts";
+import type {RestaurantI} from "@/types/Restaurant.ts";
 import {computed} from "vue";
 import RestaurantAvailabilityTime from "@/components/RestaurantAvailabilityTime.vue";
 import {useRestaurantStore} from "@/stores/restaurant.ts";
 import RestaurantAllAvailabbleBookings from "@/components/RestaurantAllAvailabbleBookings.vue";
 
 const { restaurant } = defineProps<{
-  restaurant: Restaurant,
+  restaurant: RestaurantI,
   index: number;
 }>()
 const { showAreasForSelectedRestaurant } = useRestaurantStore()

@@ -24,16 +24,17 @@
 <script setup lang="ts">
 import {ref, useTemplateRef} from "vue";
 import type {SearchToken} from "@/types/SearchToken.ts";
-import type {Posts} from "@/types/Posts.ts";
+import Restaurant from '@/components/Restaurant.vue'
+import type {Availability, Posts} from "@/types/Posts.ts";
 import type {User} from "@/types/User.ts";
 import {useInfiniteScroll} from "@/composables/useInfiniteScroll.ts";
 import {useRestaurantStore} from "@/stores/restaurant.ts";
-import Restaurant from "@/components/Restaurant.vue";
 import Filter from "@/components/Filter.vue";
 import {useRoute} from "vue-router";
 import Loader from "@/components/Loader.vue";
 import {getErrorMessage} from "@/utils/getErrorMessage.ts";
 import axios from "@/config/axios.ts";
+import type {RestaurantI} from "@/types/Restaurant.ts";
 
 const route = useRoute()
 const restaurantStore = useRestaurantStore()
@@ -67,19 +68,18 @@ async function getRestaurants() {
     searchDataLoader.value = true;
     const searchId  = await getSearchId()
     const searchData = await getSearchData(searchId)
-    await Promise.allSettled(
-        searchData.posts.map((p) =>
-          axios.get(`/api/slug_content?slug=${p.post.slug}&version=${p.post.version}&distributor=14699131&locale=sr`)
-              .then((res) => {
-                restaurantStore.restaurants.push({
-                  ...res.data,
-                  availability: p.availability,
-                  show_areas: false,
-                });
-              })
-              .catch(() => null)
-        )
+    const availabilities: Availability[] = []
+    const response = await Promise.allSettled(
+        searchData.posts.map((p) => {
+            availabilities.push(p.availability)
+           return axios.get<RestaurantI>(`/api/slug_content?slug=${p.post.slug}&version=${p.post.version}&distributor=14699131&locale=sr`)
+        })
     );
+    response.forEach((res, index) => {
+      if (res.status === 'fulfilled') {
+        restaurantStore.restaurants.push({...res.value.data, show_areas: false, availability: availabilities[index]});
+      }
+    })
   } catch (e) {
     errorMessage.value = getErrorMessage(e)
   } finally {
