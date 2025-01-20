@@ -12,9 +12,8 @@
         {{ errorMessage }}
       </div>
       <div
-          class="flex justify-center py-10"
-         :class="{ 'visible': searchDataLoader || tokenLoader, '!invisible': !searchDataLoader && !tokenLoader }"
-      >
+        class="flex justify-center py-10"
+       :class="{ 'visible': searchDataLoader || tokenLoader, '!invisible': !searchDataLoader && !tokenLoader }">
         <Loader />
       </div>
     </div>
@@ -68,16 +67,16 @@ async function getRestaurants() {
     searchDataLoader.value = true;
     const searchId  = await getSearchId()
     const searchData = await getSearchData(searchId)
-    const availabilities: Availability[] = []
+    const restaurantAvailabilities: Availability[] = []
     const response = await Promise.allSettled(
-        searchData.posts.map((p) => {
-            availabilities.push(p.availability)
-           return axios.get<RestaurantI>(`/api/slug_content?slug=${p.post.slug}&version=${p.post.version}&distributor=14699131&locale=sr`)
-        })
+      searchData.posts.map((p) => {
+        restaurantAvailabilities.push(p.availability)
+        return axios.get<RestaurantI>(`/api/slug_content?slug=${p.post.slug}&version=${p.post.version}&distributor=14699131&locale=sr`)
+      })
     );
     response.forEach((res, index) => {
       if (res.status === 'fulfilled') {
-        restaurantStore.restaurants.push({...res.value.data, show_areas: false, availability: availabilities[index]});
+        restaurantStore.restaurants.push({...res.value.data, show_areas: false, availability: restaurantAvailabilities[index]});
       }
     })
   } catch (e) {

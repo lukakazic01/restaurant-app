@@ -19,15 +19,15 @@
     <div class="flex flex-col gap-2 items-center border-l border-l-200 md:p-2 p-4 md:w-[calc(33.3333%-4px)] md:max-[calc(33.3333%-4px)] justify-center">
       <div class="flex flex-row gap-2 w-full">
         <RestaurantAvailabilityTime
-            v-for="option in restaurant.availability.recommended"
-            :key="option.id"
-            :option class="w-[calc(50%-4px)] max-w-[calc(50%-4px)]"
+          v-for="option in restaurant.availability.recommended"
+          :key="option.id"
+          :option class="w-[calc(50%-4px)] max-w-[calc(50%-4px)]"
         />
       </div>
       <button @click="showAreasForSelectedRestaurant(restaurant, index)">{{ showAreasBtnText }}</button>
     </div>
   </div>
-  <RestaurantAllAvailabbleBookings v-show="restaurant.show_areas" :areas="restaurant.availability.areas" />
+  <RestaurantAllAvailableBookings v-show="restaurant.show_areas" :areas="restaurant.availability.areas" />
 </template>
 
 <script setup lang="ts">
@@ -35,7 +35,7 @@ import type {RestaurantI} from "@/types/Restaurant.ts";
 import {computed} from "vue";
 import RestaurantAvailabilityTime from "@/components/RestaurantAvailabilityTime.vue";
 import {useRestaurantStore} from "@/stores/restaurant.ts";
-import RestaurantAllAvailabbleBookings from "@/components/RestaurantAllAvailabbleBookings.vue";
+import RestaurantAllAvailableBookings from "@/components/RestaurantAllAvailableBookings.vue";
 
 const { restaurant } = defineProps<{
   restaurant: RestaurantI,
