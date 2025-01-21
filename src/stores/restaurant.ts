@@ -7,7 +7,7 @@ export const useRestaurantStore = defineStore('restaurant', () => {
     const loading = ref(false)
 
     // Since it happens that we get duplicates from response, index was needed to check against it
-    const showAreasForSelectedRestaurant = (restaurant: RestaurantI, index: number) => {
+    const showAllBookingsForRestaurant = (restaurant: RestaurantI, index: number) => {
         if (!restaurants.value.length) return
         if (restaurant.show_areas) {
             restaurant.show_areas = false
@@ -21,5 +21,5 @@ export const useRestaurantStore = defineStore('restaurant', () => {
         })
     }
 
-    return { restaurants, loading, showAreasForSelectedRestaurant }
+    return { restaurants, loading, showAllBookingsForRestaurant }
 })

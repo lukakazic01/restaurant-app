@@ -9,16 +9,16 @@ import {isValidSize} from "@/utils/validators/isValidSize.ts";
 
 export const useFilterStore = defineStore('filter', () => {
     const route = useRoute()
-    const form = ref({
+    const filters = ref({
         date: '',
-        time: '',
-        numberOfPeople: ''
+        time:  '',
+        numberOfPeople:  ''
     })
-    const preparedForm = computed(() => {
+    const normalizedFilters = computed(() => {
         return {
-            date: form.value.date.replaceAll('-', ''),
-            time: form.value.time.replaceAll(':', ''),
-            numberOfPeople: form.value.numberOfPeople.toString()
+            date: filters.value.date.replaceAll('-', ''),
+            time: filters.value.time.replaceAll(':', ''),
+            numberOfPeople: filters.value.numberOfPeople.toString()
         }
     })
 
@@ -29,7 +29,7 @@ export const useFilterStore = defineStore('filter', () => {
         const parsedTime = parseQueryParam(time)
         const parsedNumberOfPeople = parseQueryParam(numberOfPeople)
         const size = Number(parsedNumberOfPeople);
-        form.value = {
+        filters.value = {
             numberOfPeople: (!parsedNumberOfPeople || !isValidSize(size).isValid) ? '1' : parsedNumberOfPeople,
             date: isValidDate(parsedDate).isValid ? parsedDate : currentDate,
             //Since it can happen that we access the app for example at 00:00 which is our current time that is not valid, we need to double-check
@@ -41,5 +41,12 @@ export const useFilterStore = defineStore('filter', () => {
         };
     }
 
-    return { form, preparedForm, validateQueryParams };
+    const setDefaultFilters = () => {
+        const [currentDate, currentTime] = getFormattedDateTime();
+        filters.value.date =  currentDate;
+        filters.value.time = currentTime;
+        filters.value.numberOfPeople = "1";
+    }
+
+    return { filters, normalizedFilters, validateQueryParams, setDefaultFilters };
 })

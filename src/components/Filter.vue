@@ -8,7 +8,7 @@
         :min="1"
         :max="10"
         required
-        v-model:numberOfPeople="filterStore.form.numberOfPeople"
+        v-model:numberOfPeople="filterStore.filters.numberOfPeople"
         :error="error.numberOfPeople"
       />
       <FilterDate
@@ -16,7 +16,7 @@
         placeholder="Date"
         :min="getFormattedDateTime()[0]"
         required
-        v-model:date="filterStore.form.date"
+        v-model:date="filterStore.filters.date"
         :error="error.date"
       />
       <FilterTime
@@ -25,7 +25,7 @@
         min="08:00"
         placeholder="Time"
         required
-        v-model:time="filterStore.form.time"
+        v-model:time="filterStore.filters.time"
         :error="error.time"
       />
     </div>
@@ -54,7 +54,7 @@ import {isValidSize} from "@/utils/validators/isValidSize.ts"
 const emit = defineEmits<{
   'update:restaurants': []
 }>()
-const { loading = false } = defineProps<{
+const { loading } = defineProps<{
   loading: boolean
 }>()
 
@@ -70,21 +70,24 @@ const error = ref({
 
 if (Object.keys(route.query).length) {
   filterStore.validateQueryParams()
-  router.push({ path: '/search', query: { ...filterStore.form } })
-}
+} else filterStore.setDefaultFilters()
+router.push({ path: '/search', query: { ...filterStore.filters } })
 
 const searchForRestaurants = () => {
   if(!validateForm()) return;
-  router.push({ path: '/search', query: { ...filterStore.form } })
+  router.push({ path: '/search', query: { ...filterStore.filters } })
   restaurantsStore.restaurants = []
   emit('update:restaurants')
 }
 
-//Improvement that should be done is validating if the time is in the past, so user cant search for the times in past
+/*
+  Improvement that should be done is validating if the time is in the past, so user cant search for the times in past
+  Also, date filter should be limited to some point in the future, so user can't search for reservation for example in year 3000.
+ */
 const validateForm = () => {
-  const size = Number(filterStore.form.numberOfPeople)
-  const validatedTime = isValidTime(filterStore.form.time)
-  const validatedDate = isValidDate(filterStore.form.date)
+  const size = Number(filterStore.filters.numberOfPeople)
+  const validatedTime = isValidTime(filterStore.filters.time)
+  const validatedDate = isValidDate(filterStore.filters.date)
   const validatedSize = isValidSize(size)
   if (!validatedDate.isValid) error.value.date = validatedDate.errorMessage;
   if (!validatedTime.isValid) error.value.time = validatedTime.errorMessage;

@@ -24,7 +24,7 @@
           :option class="w-[calc(50%-4px)] max-w-[calc(50%-4px)]"
         />
       </div>
-      <button @click="showAreasForSelectedRestaurant(restaurant, index)">{{ showAreasBtnText }}</button>
+      <button @click="showAllBookingsForRestaurant(restaurant, index)">{{ showAreasBtnText }}</button>
     </div>
   </div>
   <RestaurantAllAvailableBookings v-show="restaurant.show_areas" :areas="restaurant.availability.areas" />
@@ -41,7 +41,7 @@ const { restaurant, index } = defineProps<{
   restaurant: RestaurantI,
   index: number;
 }>()
-const { showAreasForSelectedRestaurant } = useRestaurantStore()
+const { showAllBookingsForRestaurant } = useRestaurantStore()
 
 const subtitle = computed(() => restaurant.subtitle.split(',')[0])
 const showAreasBtnText = computed(() => restaurant.show_areas ? restaurant.availability.page.showLess : restaurant.availability.page.showMore)
