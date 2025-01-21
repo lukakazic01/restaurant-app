@@ -30,16 +30,16 @@ export const useFilterStore = defineStore('filter', () => {
         const parsedNumberOfPeople = parseQueryParam(numberOfPeople)
         const size = Number(parsedNumberOfPeople);
         form.value = {
-            numberOfPeople: (!parsedNumberOfPeople || !isValidSize(size)) ? '1' : parsedNumberOfPeople,
+            numberOfPeople: (!parsedNumberOfPeople || !isValidSize(size).isValid) ? '1' : parsedNumberOfPeople,
             date: isValidDate(parsedDate).isValid ? parsedDate : currentDate,
             //Since it can happen that we access the app for example at 00:00 which is our current time that is not valid, we need to double-check
             time: isValidTime(parsedTime).isValid
                 ? parsedTime
                 : isValidTime(currentTime).isValid
                 ? currentTime
-                : "20:00",
+                : "08:00"
         };
     }
 
-    return { form, preparedForm, validateQueryParams }
+    return { form, preparedForm, validateQueryParams };
 })

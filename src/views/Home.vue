@@ -1,17 +1,18 @@
 <template>
   <div class="flex items-center flex-col pt-10 px-6">
-    <Filter @update:restaurants="getRestaurants" :loading="tokenLoader || restaurantStore.loading" />
+    <Filter @update:restaurants="getAllData" :loading="tokenLoader || restaurantStore.loading" />
     <div class="flex flex-col gap-4 mt-6 w-full" ref="scrollContainer">
       <template v-if="restaurantStore.restaurants.length">
         <Restaurant v-for="(restaurant, index) in restaurantStore.restaurants" :key="restaurant.title" :restaurant :index />
       </template>
-      <div class="text-center" v-else-if="shouldShowBadFilterMessage">
+      <div class="text-center" v-if="shouldShowBadFilterMessage">
         Sorry, but currently there are no restaurants to book for this filter, try again later.
       </div>
-      <div class="text-center text-red-500" v-else-if="shouldShowErrorMessage">
+      <div class="text-center text-red-500" v-if="shouldShowErrorMessage">
         {{ errorMessage }}
       </div>
       <div
+        v-if="!errorMessage"
         class="flex justify-center py-10"
        :class="{ 'visible': restaurantStore.loading || tokenLoader, '!invisible': !restaurantStore.loading && !tokenLoader }">
         <Loader />
@@ -34,6 +35,7 @@ import {getErrorMessage} from "@/utils/getErrorMessage.ts";
 import type {RestaurantI} from "@/types/Restaurant.ts";
 import {useFilterStore} from "@/stores/filter.ts";
 import {useAxios} from "@/composables/useAxios.ts";
+import {TOKEN} from "@/constants";
 
 const axios = useAxios()
 const restaurantStore = useRestaurantStore()
@@ -46,31 +48,33 @@ const shouldShowBadFilterMessage = computed(() => !errorMessage.value && !restau
 const shouldShowErrorMessage = computed(() => errorMessage.value && !restaurantStore.loading && !tokenLoader.value)
 
 let total = 0
+let searchId: null | string = null
 
 useInfiniteScroll(scrollContainer, () => {
-  if (total > restaurantStore.restaurants.length) {
+  if (total > restaurantStore.restaurants.length && !errorMessage.value) {
     getRestaurants()
   }
 });
 
-(async () => {
+getAllData()
+
+async function getAllData() {
   try {
     tokenLoader.value = true;
-    const { data } = await axios.post<User>('/api/loginAnonymously')
-    localStorage.setItem("token", data.jwt_token)
+    await getToken();
+    await getSearchId()
     await getRestaurants()
   } catch (e) {
     errorMessage.value = getErrorMessage(e)
   } finally {
     tokenLoader.value = false;
   }
-})()
+}
 
 async function getRestaurants() {
   try {
     restaurantStore.loading = true;
-    const searchId  = await getSearchId()
-    const searchData = await getSearchData(searchId)
+    const searchData = await getSearchData()
     const restaurantAvailabilities: Availability[] = []
     const response = await Promise.allSettled(
       searchData.posts.map((p) => {
@@ -90,7 +94,15 @@ async function getRestaurants() {
   }
 }
 
-const getSearchId = async () => {
+const getSearchData = async () => {
+  const { data } = await axios.post<Posts>('/api/search_request', {
+    search_id: searchId,
+  })
+  total = data.total
+  return data
+}
+
+async function getSearchId()  {
   const filters = filterStore.preparedForm;
   const { data } = await axios.post<SearchToken>('/api/search_token', {
     criteria: {
@@ -100,16 +112,14 @@ const getSearchId = async () => {
     },
     marketplace_id: "15380287",
     locale: "en",
-    geocodes: ["belgrade"]
+    geocodes: ["belgrade"],
+    ...(searchId && { search_id: searchId }),
   })
-  return data.search_id
+  searchId = data.search_id
 }
 
-const getSearchData = async (searchId: string) => {
-  const { data } = await axios.post<Posts>('/api/search_request', {
-    search_id: searchId,
-  })
-  total = data.total
-  return data
+async function getToken() {
+  const { data } = await axios.post<User>('/api/loginAnonymously')
+  localStorage.setItem(TOKEN, data.jwt_token)
 }
 </script>

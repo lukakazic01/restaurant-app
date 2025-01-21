@@ -21,8 +21,8 @@
       />
       <FilterTime
         class="basis-4/12"
-        :min="getFormattedDateTime()[1]"
         max="23:00"
+        min="08:00"
         placeholder="Time"
         required
         v-model:time="filterStore.form.time"
@@ -80,13 +80,15 @@ const searchForRestaurants = () => {
   emit('update:restaurants')
 }
 
+//Improvement that should be done is validating if the time is in the past, so user cant search for the times in past
 const validateForm = () => {
+  const size = Number(filterStore.form.numberOfPeople)
   const validatedTime = isValidTime(filterStore.form.time)
   const validatedDate = isValidDate(filterStore.form.date)
+  const validatedSize = isValidSize(size)
   if (!validatedDate.isValid) error.value.date = validatedDate.errorMessage;
   if (!validatedTime.isValid) error.value.time = validatedTime.errorMessage;
-  const size = Number(filterStore.form.numberOfPeople)
-  if (!isValidSize(size)) error.value.numberOfPeople = 'Number of guests must be between 1 and 10';
+  if (!validatedSize.isValid) error.value.numberOfPeople = validatedSize.errorMessage;
   for(const [_, e] of Object.entries(error.value)) {
     if (e) return false;
   }
